@@ -15,6 +15,7 @@ class HomeViewModel extends BaseViewModel {
   FeedOrder get feedOrder => _feedOrder;
 
   int _pageId = 0;
+  List<int> indices = <int>[0];
 
   late FeedRequestUsecase feedUsecase;
 
@@ -32,6 +33,8 @@ class HomeViewModel extends BaseViewModel {
     if (_feedOrder != selectedValue) {
       _feedOrder = selectedValue;
       _pageId = 0;
+      indices.clear();
+      indices.add(0);
       busy = true;
       notifyListeners();
       await _loadFeed();
@@ -62,9 +65,12 @@ class HomeViewModel extends BaseViewModel {
 
   FutureOr<void> _loadFeed() async {
     try {
+      if (indices.length == _pageId) {
+        indices.add(feed.last.id);
+      }
       final request = FeedRequestParams(
         order: _feedOrder,
-        pageId: _pageId,
+        pageId: indices[_pageId],
         pageSize: Constants.pageSize,
       );
       final response = await feedUsecase.execute(request);
